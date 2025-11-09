@@ -22,12 +22,19 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<String> handleIllegalArgument(IllegalArgumentException ex) {
         String message = ex.getMessage();
-        if (message != null && (
-                message.contains("Page number cannot be negative") ||
-                        message.contains("Page size must be at least 1") ||
-                        message.contains("Page size cannot exceed")
-        )) {
-            return ResponseEntity.badRequest().body(message);
+        if (message != null) {
+            // Handle pagination validation errors
+            if (message.contains("Page number cannot be negative") ||
+                    message.contains("Page size must be at least") ||
+                    message.contains("Page size cannot exceed")) {
+                return ResponseEntity.badRequest().body(message);
+            }
+            // Handle other validation errors
+            if (message.contains("must be between") ||
+                    message.contains("must not be blank") ||
+                    message.contains("must be in the past")) {
+                return ResponseEntity.badRequest().body(message);
+            }
         }
         return ResponseEntity.badRequest().body(ex.getMessage());
     }
@@ -43,11 +50,12 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<String> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
-        if (ex.getMessage().contains("genre_name_unique")) {
-            return ResponseEntity.badRequest().body("Genre with this name already exists");
+        String message = ex.getMessage().toLowerCase();
+        if (message.contains("unique") || message.contains("genre_name_unique")) {
+            return ResponseEntity.badRequest().body("A genre with this name already exists.");
         }
-        if (ex.getMessage().contains("actor_birth_date_check")) {
-            return ResponseEntity.badRequest().body("Invalid birth date format");
+        if (message.contains("birth_date")) {
+            return ResponseEntity.badRequest().body("Actor birth date is invalid.");
         }
         return ResponseEntity.badRequest().body("Database constraint violation: " + ex.getMessage());
     }
@@ -61,9 +69,18 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleInvalidPaginationParameter(MethodArgumentTypeMismatchException ex) {
         if ("page".equals(ex.getName()) || "size".equals(ex.getName())) {
             return ResponseEntity.badRequest().body(
-                    String.format("Invalid %s parameter: %s", ex.getName(), ex.getValue())
+                    String.format("Invalid %s parameter: '%s'. Must be a positive integer.",
+                            ex.getName(), ex.getValue())
             );
         }
         return ResponseEntity.badRequest().body("Invalid parameter: " + ex.getName());
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<String> handleUnexpectedException(Exception ex) {
+        // Log the error for debugging
+        ex.printStackTrace();
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("An unexpected error occurred: " + ex.getMessage());
     }
 }
