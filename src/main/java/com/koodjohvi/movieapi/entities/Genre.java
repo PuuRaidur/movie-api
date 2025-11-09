@@ -7,6 +7,7 @@ import java.util.Set;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 @Entity
@@ -17,8 +18,9 @@ public class Genre {
     private Long id;
 
     @NotBlank(message = "Genre name is required")
-    @Size(min = 2, max = 30, message = "Genre name must be between 2 and 30 characters")
-    @Column(nullable = false, unique = true)
+    @Size(min = 2, max = 50, message = "Genre name must be between 2 and 50 characters")
+    @Pattern(regexp = "^[a-zA-Z\\s]+$", message = "Genre name can only contain letters and spaces")
+    @Column(unique = true)
     private String name;
 
     @ManyToMany(mappedBy = "genres")

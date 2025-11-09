@@ -35,8 +35,8 @@ public class GenreController {
 
     // get genre by ID (GET /api/genres/{id})
     @GetMapping("/{id}")
-    public Genre getGenreById(@PathVariable Long id) {
-        return genreService.getGenreById(id);
+    public ResponseEntity<Genre> getGenreById(@PathVariable Long id) {
+        return ResponseEntity.ok(genreService.getGenreById(id));
     }
 
     // update genre (PATCH /api/genres/{id})
@@ -46,7 +46,7 @@ public class GenreController {
         return ResponseEntity.ok(updated);
     }
 
-    // delete genre either by force or not (DELETE /api/genres/{id}?froce={true/false})
+    // delete genre either by force or not (DELETE /api/genres/{id}?force={true/false})
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteGenre(@PathVariable Long id, @RequestParam(defaultValue = "false") boolean force) {
         genreService.deleteGenre(id, force);

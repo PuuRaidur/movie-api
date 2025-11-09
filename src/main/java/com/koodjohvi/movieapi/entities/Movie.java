@@ -4,8 +4,7 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.*;
 
 @Entity
 @Table(name = "movie")
@@ -15,17 +14,22 @@ public class Movie {
     private Long id;
 
     @NotBlank(message = "Movie title is required")
+    @Size(min = 2, max = 100, message = "Title must be between 2 and 100 characters")
     @Column(nullable = false)
     private String title;
 
-    @Column(nullable = false)
+    @NotNull(message = "Release year is required")
+    @Min(value = 1888, message = "Release year cannot be before 1888 (first movie year)")
+    @Max(value = 2100, message = "Release year cannot be in the future")
     private Integer releaseYear;
 
-    @Column(nullable = false)
-    @Min(value = 1, message = "Duration must be at least 1 minute")
+    @NotNull(message = "Duration is required")
+    @Positive(message = "Duration must be positive")
+    @Max(value = 600, message = "Duration cannot exceed 600 minutes (10 hours)")
     private Integer duration;
 
     @ManyToMany
+    @NotEmpty(message = "Movie must have at least one genre")
     @JoinTable(
         name = "movie_genres",
         joinColumns = @JoinColumn(name = "movie_id"),

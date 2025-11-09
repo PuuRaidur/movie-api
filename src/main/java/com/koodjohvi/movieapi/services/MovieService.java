@@ -7,16 +7,12 @@ import com.koodjohvi.movieapi.exception.ResourceNotFoundException;
 import com.koodjohvi.movieapi.repositories.ActorRepository;
 import com.koodjohvi.movieapi.repositories.GenreRepository;
 import com.koodjohvi.movieapi.repositories.MovieRepository;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Service
 @Transactional
@@ -76,8 +72,8 @@ public class MovieService {
 
     // get all movies with pagination
     @Transactional(readOnly = true)
-    public Page<Movie> getAllMovies(Pageable pageable) {
-        return movieRepository.findAll(pageable);
+    public Object getAllMovies(Pageable pageable, boolean unpaginated) {
+        return unpaginated ? movieRepository.findAll() : movieRepository.findAll(pageable);
     }
 
     // get movie by ID
@@ -87,37 +83,51 @@ public class MovieService {
         .orElseThrow(() -> new ResourceNotFoundException("No movie found with ID: " + id));
     }
 
-    // get movies by genre with pagination
-    @Transactional(readOnly = true)
-    public Page<Movie> getMoviesByGenre(Long genreId, Pageable pageable) {
-        return movieRepository.findByGenresId(genreId, pageable);
-    }
-
     // get movies by year with pagination
     @Transactional(readOnly = true)
-    public Page<Movie> getMoviesByYear(Integer year, Pageable pageable) {
-        return movieRepository.findByReleaseYear(year, pageable);
+    public Object getMoviesByYear(Integer year, Pageable pageable, boolean unpaginated) {
+        return unpaginated
+        ? movieRepository.findByReleaseYear(year)
+        : movieRepository.findByReleaseYear(year, pageable);
+    }
+
+    // get movies by genre with pagination
+    @Transactional(readOnly = true)
+    public Object getMoviesByGenre(Long genreId, Pageable pageable, boolean unpaginated) {
+        if (!genreRepository.existsById(genreId)) {
+            throw new ResourceNotFoundException("Genre not found: " + genreId);
+        }
+
+        return unpaginated
+        ? movieRepository.findByGenresId(genreId)
+        : movieRepository.findByGenresId(genreId, pageable);
     }
 
     // get movies by actor with pagination
     @Transactional(readOnly = true)
-    public Page<Movie> getMoviesByActor(Long actorId, Pageable pageable) {
-        return movieRepository.findByActorsId(actorId, pageable);
+    public Object getMoviesByActor(Long actorId, Pageable pageable, boolean unpaginated) {
+        if (!actorRepository.existsById(actorId)) {
+            throw new ResourceNotFoundException("Actor not found: " + actorId);
+        }
+
+        return unpaginated
+        ? movieRepository.findByActorsId(actorId)
+        : movieRepository.findByActorsId(actorId, pageable);
     }
 
     // get movies by title with pagination
-    public Page<Movie> getMoviesByTitleContainingIgnoreCase(String title, Pageable pageable) {
-        if (title == null || title.trim().isEmpty()) {
-            return getAllMovies(pageable);
-        }
-        return movieRepository.findByTitleContainingIgnoreCase(title.trim(), pageable);
+    public Object getMoviesByTitleContainingIgnoreCase(String title, Pageable pageable, boolean unpaginated) {
+        return unpaginated
+        ? movieRepository.findByTitleContainingIgnoreCase(title)
+        : movieRepository.findByTitleContainingIgnoreCase(title, pageable);
     }
 
     // get all actors in a movie
     @Transactional(readOnly = true)
     public List<Actor> getActorsByMovie(Long movieId) {
+        // validate movie exists first
         Movie movie = movieRepository.findById(movieId)
-        .orElseThrow(() -> new ResourceNotFoundException("No movie found with ID: " + movieId));
+        .orElseThrow(() -> new ResourceNotFoundException("Movie not found with ID: " + movieId));
         return new ArrayList<>(movie.getActors());
     }
 

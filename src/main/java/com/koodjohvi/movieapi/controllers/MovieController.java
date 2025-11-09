@@ -2,13 +2,18 @@ package com.koodjohvi.movieapi.controllers;
 
 import com.koodjohvi.movieapi.entities.Actor;
 import com.koodjohvi.movieapi.entities.Movie;
+import com.koodjohvi.movieapi.exception.ResourceNotFoundException;
+import com.koodjohvi.movieapi.repositories.ActorRepository;
+import com.koodjohvi.movieapi.repositories.GenreRepository;
 import com.koodjohvi.movieapi.services.MovieService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.util.List;
 
@@ -17,9 +22,13 @@ import java.util.List;
 @Validated
 public class MovieController {
     private final MovieService movieService;
+    private final GenreRepository genreRepository;
+    private final ActorRepository actorRepository;
 
-    public MovieController(MovieService movieService) {
+    public MovieController(MovieService movieService, GenreRepository genreRepository, ActorRepository actorRepository) {
         this.movieService = movieService;
+        this.genreRepository = genreRepository;
+        this.actorRepository = actorRepository;
     }
 
     // create movie (POST /api/movies)
@@ -31,7 +40,7 @@ public class MovieController {
 
     // get movies by filter(genre, year, actor, title) (GET /api/movies)
     @GetMapping
-    public ResponseEntity<?> getMovies(
+    public ResponseEntity<?> getAllMovies(
             @RequestParam(required = false) Long genre,
             @RequestParam(required = false) Integer year,
             @RequestParam(required = false) Long actor,
@@ -39,30 +48,53 @@ public class MovieController {
             Pageable pageable
     ) {
         try {
+            // Check if pagination is NOT requested (i.e., user didn't provide page/size)
+            boolean isUnpaginated = !isPaginationRequested();
+
             if (genre != null) {
-                return ResponseEntity.ok(movieService.getMoviesByGenre(genre, pageable));
+                // Validates genre exists first
+                if (!genreRepository.existsById(genre)) {
+                    throw new ResourceNotFoundException("Genre not found with id: " + genre);
+                }
+                return ResponseEntity.ok(movieService.getMoviesByGenre(genre, pageable, isUnpaginated));
             } else if (year != null) {
-                return ResponseEntity.ok(movieService.getMoviesByYear(year, pageable));
+                return ResponseEntity.ok(movieService.getMoviesByYear(year, pageable, isUnpaginated));
             } else if (actor != null) {
-                return ResponseEntity.ok(movieService.getMoviesByActor(actor, pageable));
+                // Validates actor exists first
+                if (!actorRepository.existsById(actor)) {
+                    throw new ResourceNotFoundException("Actor not found with id: " + actor);
+                }
+                return buildResponse(movieService.getMoviesByActor(actor, pageable, isUnpaginated));
             } else if (title != null) {
-                return ResponseEntity.ok(movieService.getMoviesByTitleContainingIgnoreCase(title, pageable));
+                return ResponseEntity.ok(movieService.getMoviesByTitleContainingIgnoreCase(title, pageable, isUnpaginated));
             } else {
-                return ResponseEntity.ok(movieService.getAllMovies(pageable));
+                return ResponseEntity.ok(movieService.getAllMovies(pageable, isUnpaginated));
             }
         } catch (Exception e) {
-            // Handle invalid pagination parameters
-            if (e.getMessage().contains("Invalid page") || e.getMessage().contains("Invalid size")) {
+            if (e.getMessage() != null &&
+                    (e.getMessage().contains("Invalid page") || e.getMessage().contains("Invalid size"))) {
                 return ResponseEntity.badRequest().body("Invalid pagination parameters");
             }
             throw e;
         }
     }
 
+    // Helper: detect if user explicitly asked for pagination
+    private boolean isPaginationRequested() {
+        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
+        return request.getParameter("page") != null || request.getParameter("size") != null;
+    }
+
+    // Helper: wrap result in ResponseEntity (handles both List and Page)
+    private ResponseEntity<?> buildResponse(Object result) {
+        return ResponseEntity.ok(result);
+    }
+
     // search for movies (GET /api/movies/search?title=)
     @GetMapping("/search")
-    public Page<Movie> searchMovies(@RequestParam String title, Pageable pageable) {
-        return movieService.getMoviesByTitleContainingIgnoreCase(title, pageable);
+    public Object searchMovies(@RequestParam String title, Pageable pageable) {
+        boolean isUnpaginated = !isPaginationRequested();
+        return movieService.getMoviesByTitleContainingIgnoreCase(title, pageable, isUnpaginated);
     }
 
     // get movie by ID (GET /api/movies/{id})
@@ -72,9 +104,10 @@ public class MovieController {
     }
 
     // get actors in movie by ID(GET /api/movies/{id}/actors)
-    @GetMapping("/{id}/actors")
-    public List<Actor> getActorsByMovie(@PathVariable Long id) {
-        return movieService.getActorsByMovie(id);
+    @GetMapping("/{movieId}/actors")
+    public ResponseEntity<List<Actor>> getActorsByMovie(@PathVariable Long movieId) {
+        List<Actor> actors = movieService.getActorsByMovie(movieId);
+        return ResponseEntity.ok(actors);
     }
 
     // update movie by ID(PATCH /api/movies/{id})

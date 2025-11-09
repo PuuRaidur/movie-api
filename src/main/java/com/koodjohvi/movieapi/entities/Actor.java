@@ -7,9 +7,7 @@ import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Past;
+import jakarta.validation.constraints.*;
 
 @Entity
 @Table(name = "actor")
@@ -18,13 +16,13 @@ public class Actor {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank(message = "Actor name is required")
-    @Column(nullable = false)
+    @NotBlank(message = "Name is required")
+    @Size(min = 2, max = 100, message = "Name must be between 2 and 100 characters")
+    @Pattern(regexp = "^[a-zA-Z\\s.'-]+$", message = "Name can only contain letters, spaces, dots, apostrophes and hyphens")
     private String name;
 
     @NotNull(message = "Birth date is required")
     @Past(message = "Birth date must be in the past")
-    @Column(nullable = false)
     private LocalDate birthDate;
 
     @ManyToMany(mappedBy = "actors")

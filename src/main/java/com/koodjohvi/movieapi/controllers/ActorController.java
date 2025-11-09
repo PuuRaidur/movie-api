@@ -2,12 +2,14 @@ package com.koodjohvi.movieapi.controllers;
 
 import com.koodjohvi.movieapi.entities.Actor;
 import com.koodjohvi.movieapi.services.ActorService;
-import org.springframework.data.domain.Page;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import jakarta.validation.Valid;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 @RestController
 @RequestMapping("/api/actors")
@@ -27,20 +29,42 @@ public class ActorController {
         return ResponseEntity.status(201).body(saved);
     }
 
-    // get actor(s) by name (GET /api/actors)
-    // supports ?name= and pagination(ex: ?page=0?size=10)
+    // get actor(s) by name or with pagination(GET /api/actors?name or GET /api/actors?page=0&size=10)
     @GetMapping
-    public Page<Actor> getActors(@RequestParam(required = false) String name, Pageable pageable) {
-        if (name != null) {
-            return actorService.getActorsByNameContainingIgnoreCase(name, pageable);
+    public ResponseEntity<?> getAllActors(@RequestParam(required = false) String name, Pageable pageable) {
+        try {
+            boolean isUnpaginated = !isPaginationRequested();
+
+            if (name != null) {
+                return ResponseEntity.ok(actorService.getActorsByNameContainingIgnoreCase(name, pageable, isUnpaginated));
+            } else {
+                return ResponseEntity.ok(actorService.getAllActors(pageable, isUnpaginated));
+            }
+        } catch (Exception e) {
+            if (e.getMessage() != null &&
+                    (e.getMessage().contains("Invalid page") || e.getMessage().contains("Invalid size"))) {
+                return ResponseEntity.badRequest().body("Invalid pagination parameters");
+            }
+            throw e;
         }
-        return actorService.getAllActors(pageable);
+    }
+
+    // Helper: detect if user provided page or size
+    private boolean isPaginationRequested() {
+        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
+        return request.getParameter("page") != null || request.getParameter("size") != null;
     }
 
     // get actor by ID (GET /api/actors/{ID})
     @GetMapping("/{id}")
     public Actor getActorById(@PathVariable Long id) {
         return actorService.getActorById(id);
+    }
+
+    @GetMapping("/search")
+    public Object searchActors(@RequestParam String name, Pageable pageable) {
+        boolean isUnpaginated = !isPaginationRequested();
+        return actorService.getActorsByNameContainingIgnoreCase(name, pageable, isUnpaginated);
     }
 
     // update actor by ID (PATCH /api/actors/{id})

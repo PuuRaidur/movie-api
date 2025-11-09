@@ -6,7 +6,6 @@ import com.koodjohvi.movieapi.exception.DeletionNotAllowedException;
 import com.koodjohvi.movieapi.exception.ResourceNotFoundException;
 import com.koodjohvi.movieapi.repositories.ActorRepository;
 import com.koodjohvi.movieapi.repositories.MovieRepository;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,8 +41,10 @@ public class ActorService {
 
     // get all actors with pagination
     @Transactional(readOnly = true)
-    public Page<Actor> getAllActors(Pageable pageable) {
-        return actorRepository.findAll(pageable);
+    public Object getAllActors(Pageable pageable, boolean unpaginated) {
+        return unpaginated
+        ? actorRepository.findAll()
+        : actorRepository.findAll(pageable);
     }
 
     // get actor by ID
@@ -55,11 +56,10 @@ public class ActorService {
 
     // get actors by name with pagination
     @Transactional(readOnly = true)
-    public Page<Actor> getActorsByNameContainingIgnoreCase(String name, Pageable pageable) {
-        if (name == null || name.trim().isEmpty()) {
-            return getAllActors(pageable);
-        }
-        return actorRepository.findByNameContainingIgnoreCase(name.trim(), pageable);
+    public Object getActorsByNameContainingIgnoreCase(String name, Pageable pageable, boolean unpaginated) {
+        return unpaginated
+        ? actorRepository.findByNameContainingIgnoreCase(name)
+        : actorRepository.findByNameContainingIgnoreCase(name, pageable);
     }
 
     // update actor(PATCH)
