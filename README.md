@@ -22,7 +22,7 @@ A robust RESTful API for managing a movie database, built with **Spring Boot**, 
 ## ⚙️ Setup & Installation
 
 ### Prerequisites
-- **Java 17+**
+- **Java 25+**
 - **Gradle** (included via wrapper)
 - **SQLite** (no install needed — embedded via JDBC)
 
