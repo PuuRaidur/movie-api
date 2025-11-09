@@ -22,21 +22,20 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<String> handleIllegalArgument(IllegalArgumentException ex) {
         String message = ex.getMessage();
-        if (message != null) {
-            // Handle pagination validation errors
-            if (message.contains("Page number cannot be negative") ||
-                    message.contains("Page size must be at least") ||
-                    message.contains("Page size cannot exceed")) {
-                return ResponseEntity.badRequest().body(message);
-            }
-            // Handle other validation errors
-            if (message.contains("must be between") ||
-                    message.contains("must not be blank") ||
-                    message.contains("must be in the past")) {
-                return ResponseEntity.badRequest().body(message);
-            }
+        if (message == null) {
+            return ResponseEntity.badRequest().body("Invalid request parameters");
         }
-        return ResponseEntity.badRequest().body(ex.getMessage());
+
+        // Handle pagination errors first
+        if (message.contains("Invalid page number") ||
+                message.contains("Invalid page size") ||
+                message.contains("Page numbers start at") ||
+                message.contains("Maximum allowed page size")) {
+            return ResponseEntity.badRequest().body(message);
+        }
+
+        // Handle other validation errors
+        return ResponseEntity.badRequest().body(message);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
