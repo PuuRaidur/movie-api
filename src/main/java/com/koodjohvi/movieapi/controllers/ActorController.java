@@ -2,6 +2,7 @@ package com.koodjohvi.movieapi.controllers;
 
 import com.koodjohvi.movieapi.entities.Actor;
 import com.koodjohvi.movieapi.services.ActorService;
+import com.koodjohvi.movieapi.util.PaginationValidator;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -17,9 +18,11 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 public class ActorController {
 
     private final ActorService actorService;
+    private final PaginationValidator paginationValidator;
 
-    public ActorController(ActorService actorService) {
+    public ActorController(ActorService actorService, PaginationValidator paginationValidator) {
         this.actorService = actorService;
+        this.paginationValidator = paginationValidator;
     }
 
     // create actor (POST /api/actors)
@@ -33,6 +36,8 @@ public class ActorController {
     @GetMapping
     public ResponseEntity<?> getAllActors(@RequestParam(required = false) String name, Pageable pageable) {
         try {
+            // Validate pagination first
+            paginationValidator.validatePageable(pageable);
             boolean isUnpaginated = !isPaginationRequested();
 
             if (name != null) {
@@ -63,6 +68,8 @@ public class ActorController {
 
     @GetMapping("/search")
     public Object searchActors(@RequestParam String name, Pageable pageable) {
+        // Validate pagination FIRST
+        paginationValidator.validatePageable(pageable);
         boolean isUnpaginated = !isPaginationRequested();
         return actorService.getActorsByNameContainingIgnoreCase(name, pageable, isUnpaginated);
     }

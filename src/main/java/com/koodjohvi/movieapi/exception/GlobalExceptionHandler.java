@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -20,6 +21,14 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<String> handleIllegalArgument(IllegalArgumentException ex) {
+        String message = ex.getMessage();
+        if (message != null && (
+                message.contains("Page number cannot be negative") ||
+                        message.contains("Page size must be at least 1") ||
+                        message.contains("Page size cannot exceed")
+        )) {
+            return ResponseEntity.badRequest().body(message);
+        }
         return ResponseEntity.badRequest().body(ex.getMessage());
     }
 
@@ -46,5 +55,15 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(DeletionNotAllowedException.class)
     public ResponseEntity<String> handleDeletionNotAllowed(DeletionNotAllowedException ex) {
         return ResponseEntity.badRequest().body(ex.getMessage());
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<String> handleInvalidPaginationParameter(MethodArgumentTypeMismatchException ex) {
+        if ("page".equals(ex.getName()) || "size".equals(ex.getName())) {
+            return ResponseEntity.badRequest().body(
+                    String.format("Invalid %s parameter: %s", ex.getName(), ex.getValue())
+            );
+        }
+        return ResponseEntity.badRequest().body("Invalid parameter: " + ex.getName());
     }
 }

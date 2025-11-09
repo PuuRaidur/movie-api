@@ -6,6 +6,7 @@ import com.koodjohvi.movieapi.exception.ResourceNotFoundException;
 import com.koodjohvi.movieapi.repositories.ActorRepository;
 import com.koodjohvi.movieapi.repositories.GenreRepository;
 import com.koodjohvi.movieapi.services.MovieService;
+import com.koodjohvi.movieapi.util.PaginationValidator;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Pageable;
@@ -24,11 +25,16 @@ public class MovieController {
     private final MovieService movieService;
     private final GenreRepository genreRepository;
     private final ActorRepository actorRepository;
+    private final PaginationValidator paginationValidator;
 
-    public MovieController(MovieService movieService, GenreRepository genreRepository, ActorRepository actorRepository) {
+    public MovieController(MovieService movieService,
+                           GenreRepository genreRepository,
+                           ActorRepository actorRepository,
+                           PaginationValidator paginationValidator) {
         this.movieService = movieService;
         this.genreRepository = genreRepository;
         this.actorRepository = actorRepository;
+        this.paginationValidator = paginationValidator;
     }
 
     // create movie (POST /api/movies)
@@ -48,6 +54,8 @@ public class MovieController {
             Pageable pageable
     ) {
         try {
+            // Validate pagination FIRST
+            paginationValidator.validatePageable(pageable);
             // Check if pagination is NOT requested (i.e., user didn't provide page/size)
             boolean isUnpaginated = !isPaginationRequested();
 
@@ -93,6 +101,8 @@ public class MovieController {
     // search for movies (GET /api/movies/search?title=)
     @GetMapping("/search")
     public Object searchMovies(@RequestParam String title, Pageable pageable) {
+        // Validate pagination FIRST
+        paginationValidator.validatePageable(pageable);
         boolean isUnpaginated = !isPaginationRequested();
         return movieService.getMoviesByTitleContainingIgnoreCase(title, pageable, isUnpaginated);
     }
