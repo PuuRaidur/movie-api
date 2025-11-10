@@ -10,6 +10,7 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -22,20 +23,9 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<String> handleIllegalArgument(IllegalArgumentException ex) {
         String message = ex.getMessage();
-        if (message == null) {
-            return ResponseEntity.badRequest().body("Invalid request parameters");
-        }
-
-        // Handle pagination errors first
-        if (message.contains("Invalid page number") ||
-                message.contains("Invalid page size") ||
-                message.contains("Page numbers start at") ||
-                message.contains("Maximum allowed page size")) {
-            return ResponseEntity.badRequest().body(message);
-        }
+        return ResponseEntity.badRequest().body(Objects.requireNonNullElse(message, "Invalid request parameters"));
 
         // Handle other validation errors
-        return ResponseEntity.badRequest().body(message);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
