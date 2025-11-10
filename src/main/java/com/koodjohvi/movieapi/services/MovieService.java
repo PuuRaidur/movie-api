@@ -3,6 +3,7 @@ package com.koodjohvi.movieapi.services;
 import com.koodjohvi.movieapi.entities.Actor;
 import com.koodjohvi.movieapi.entities.Genre;
 import com.koodjohvi.movieapi.entities.Movie;
+import com.koodjohvi.movieapi.exception.DeletionNotAllowedException;
 import com.koodjohvi.movieapi.exception.ResourceNotFoundException;
 import com.koodjohvi.movieapi.repositories.ActorRepository;
 import com.koodjohvi.movieapi.repositories.GenreRepository;
@@ -192,10 +193,41 @@ public class MovieService {
     }
 
     // delete movie
-    public void deleteMovie(Long id) {
-        if(!movieRepository.existsById(id)) {
-            throw new ResourceNotFoundException("No movie found with ID: " + id);
+    public void deleteMovie(Long id, boolean force) {
+        Movie movie = movieRepository.findById(id)
+        .orElseThrow(() -> new ResourceNotFoundException("Movie not found with ID: " + id));
+
+        // Check if there are associated genres OR actors
+        if (!force && (!movie.getGenres().isEmpty() || !movie.getActors().isEmpty())) {
+            int genreCount = movie.getGenres().size();
+            int actorCount = movie.getActors().size();
+
+            StringBuilder message = new StringBuilder("Cannot delete movie '" + movie.getTitle() + "'");
+
+            // show error messages
+            if (genreCount > 0 && actorCount > 0) {
+                message.append(" because it has ").append(genreCount).append(" genre(s) and ")
+                        .append(actorCount).append(" actor(s) associated with it.");
+            } else if (genreCount > 0) {
+                message.append(" because it has ").append(genreCount).append(" genre(s) associated with it.");
+            } else {
+                message.append(" because it has ").append(actorCount).append(" actor(s) associated with it.");
+            }
+
+            throw new DeletionNotAllowedException(message.toString());
         }
+
+        // relationship clearing
+        if (force) {
+            // Clear all genre relationships
+            movie.getGenres().forEach(genre -> genre.getMovies().remove(movie));
+            // Clear all actor relationships
+            movie.getActors().forEach(actor -> actor.getMovies().remove(movie));
+
+            // Save all affected entities in batch
+            movieRepository.save(movie); // This will cascade the relationship changes
+        }
+
         movieRepository.deleteById(id);
     }
 }

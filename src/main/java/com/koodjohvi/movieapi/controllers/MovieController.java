@@ -121,8 +121,8 @@ public class MovieController {
 
     // delete movie either by force or not (DELETE /api/movies/{id}?force={true/false})
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteMovie(@PathVariable Long id) {
-        movieService.deleteMovie(id);
+    public ResponseEntity<Void> deleteMovie(@PathVariable Long id, @RequestParam(defaultValue = "false") boolean force) {
+        movieService.deleteMovie(id, force);
         return ResponseEntity.noContent().build();
     }
 }
