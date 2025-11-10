@@ -193,6 +193,7 @@ public class MovieService {
     }
 
     // delete movie
+    @Transactional
     public void deleteMovie(Long id, boolean force) {
         Movie movie = movieRepository.findById(id)
         .orElseThrow(() -> new ResourceNotFoundException("Movie not found with ID: " + id));

@@ -68,6 +68,7 @@ public class GenreService {
     }
 
     // delete genre either by force or not
+    @Transactional
     public void deleteGenre(Long id, boolean force) {
         Genre genre = genreRepository.findById(id)
         .orElseThrow(() -> new ResourceNotFoundException("Genre not found with ID: " + id));

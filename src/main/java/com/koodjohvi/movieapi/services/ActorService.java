@@ -102,6 +102,7 @@ public class ActorService {
     }
 
     // delete actor either by force or not
+    @Transactional
     public void deleteActor(Long id, boolean force) {
         Actor actor = actorRepository.findById(id)
         .orElseThrow(() -> new ResourceNotFoundException("No actor found with ID: " + id));
