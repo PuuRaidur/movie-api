@@ -459,7 +459,7 @@
 					"response": []
 				},
 				{
-					"name": "Search movies by release year(GET)",
+					"name": "Get movies by release year(GET)",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -478,6 +478,72 @@
 								{
 									"key": "year",
 									"value": "2015"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get movies by genre(GET)",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\" : \"Adventure\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/movies?genre=1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"movies"
+							],
+							"query": [
+								{
+									"key": "genre",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get movies by actor(GET)",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/movies?actor=1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"movies"
+							],
+							"query": [
+								{
+									"key": "actor",
+									"value": "1"
 								}
 							]
 						}
