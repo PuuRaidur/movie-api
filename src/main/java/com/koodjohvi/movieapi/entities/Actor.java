@@ -25,7 +25,7 @@ public class Actor {
     @Past(message = "Birth date must be in the past")
     private LocalDate birthDate;
 
-    @ManyToMany(mappedBy = "actors")
+    @ManyToMany(mappedBy = "actors", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JsonIgnore
     private Set<Movie> movies = new HashSet<>();
 

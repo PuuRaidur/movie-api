@@ -117,11 +117,8 @@ public class ActorService {
 
         // if force is on
         if (force) {
-            // remove actor from all associated movies
-            for(Movie movie : actor.getMovies()) {
-                movie.getActors().remove(actor);
-                movieRepository.save(movie);
-            }
+            // Clear all movie relationships for this actor
+            movieRepository.clearActorRelationships(id);
         }
 
         actorRepository.deleteById(id);

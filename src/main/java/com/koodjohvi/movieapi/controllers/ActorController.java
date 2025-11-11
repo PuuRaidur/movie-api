@@ -24,7 +24,7 @@ public class ActorController {
 
     // create actor (POST /api/actors)
     @PostMapping
-    public ResponseEntity<Actor> addActor(@Valid @RequestBody Actor actor) {
+    public ResponseEntity<Actor> createActor(@Valid @RequestBody Actor actor) {
         Actor saved = actorService.createActor(actor);
         return ResponseEntity.status(201).body(saved);
     }

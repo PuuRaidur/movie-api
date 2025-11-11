@@ -83,13 +83,10 @@ public class GenreService {
 
         // if force is on
         if(force) {
-            // remove genre from all associated movies
-            for(Movie movie : genre.getMovies()) {
-                movie.getGenres().remove(genre);
-                movieRepository.save(movie);
-            }
+            // Clear all relationships in a single batch operation
+            movieRepository.clearGenreRelationships(genre.getId());
         }
 
-        genreRepository.deleteById(id);
+        genreRepository.delete(genre);
     }
 }

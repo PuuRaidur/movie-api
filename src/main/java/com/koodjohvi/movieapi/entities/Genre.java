@@ -23,7 +23,7 @@ public class Genre {
     @Column(unique = true)
     private String name;
 
-    @ManyToMany(mappedBy = "genres")
+    @ManyToMany(mappedBy = "genres", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JsonIgnore
     private Set<Movie> movies = new HashSet<>();
 

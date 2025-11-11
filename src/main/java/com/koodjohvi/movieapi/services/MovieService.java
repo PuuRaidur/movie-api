@@ -220,13 +220,9 @@ public class MovieService {
 
         // relationship clearing
         if (force) {
-            // Clear all genre relationships
-            movie.getGenres().forEach(genre -> genre.getMovies().remove(movie));
-            // Clear all actor relationships
-            movie.getActors().forEach(actor -> actor.getMovies().remove(movie));
-
-            // Save all affected entities in batch
-            movieRepository.save(movie); // This will cascade the relationship changes
+            // Clear all relationships in batch operations
+            movieRepository.clearMovieGenreRelationships(movie.getId());
+            movieRepository.clearMovieActorRelationships(movie.getId());
         }
 
         movieRepository.deleteById(id);

@@ -28,7 +28,7 @@ public class Movie {
     @Max(value = 600, message = "Duration cannot exceed 600 minutes (10 hours)")
     private Integer duration;
 
-    @ManyToMany(cascade = {CascadeType.MERGE, CascadeType.PERSIST})
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @NotEmpty(message = "Movie must have at least one genre")
     @JoinTable(
         name = "movie_genres",
@@ -37,7 +37,7 @@ public class Movie {
     )
     private Set<Genre> genres = new HashSet<>();
 
-    @ManyToMany(cascade = {CascadeType.MERGE, CascadeType.PERSIST})
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
         name = "movie_actors",
         joinColumns = @JoinColumn(name = "movie_id"),
