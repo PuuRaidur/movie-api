@@ -13,4 +13,5 @@ public interface ActorRepository extends JpaRepository<Actor, Long> {
     // custom query methods as mandatory
     List<Actor> findByNameContainingIgnoreCase(String name);
     Page<Actor> findByNameContainingIgnoreCase(String name, Pageable pageable);
+    boolean existsByNameIgnoreCase(String name);
 }

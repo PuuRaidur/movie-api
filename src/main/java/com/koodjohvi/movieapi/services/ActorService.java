@@ -35,7 +35,12 @@ public class ActorService {
         if (actor.getBirthDate().isAfter(LocalDate.now())) {
             throw new IllegalArgumentException("Birth date cannot be in the future");
         }
+        String actorName = actor.getName().trim();
+        if (actorRepository.existsByNameIgnoreCase(actorName)) {
+            throw new IllegalArgumentException("An actor with this name already exists");
+        }
 
+        actor.setName(actorName);
         return actorRepository.save(actor);
     }
 
