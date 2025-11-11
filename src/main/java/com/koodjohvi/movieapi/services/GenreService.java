@@ -61,11 +61,12 @@ public class GenreService {
 
         // Update only the name field
         if (updatedGenre.getName() != null && !updatedGenre.getName().trim().isEmpty()) {
-            // Check for duplicate name (excluding current genre)
-            if (!existing.getName().equalsIgnoreCase(updatedGenre.getName()) &&
-                    genreRepository.findByNameContainingIgnoreCase(updatedGenre.getName()).isPresent()) {
-                throw new IllegalStateException("Genre name '" + updatedGenre.getName() + "' is already taken");
+            // checks for duplicate genres
+            String genreName = updatedGenre.getName().trim();
+            if (genreRepository.existsByNameIgnoreCase(genreName)) {
+                throw new IllegalArgumentException("A genre with this name already exists");
             }
+            // Check for duplicate name (excluding current genre)
             existing.setName(updatedGenre.getName().trim());
         }
 
