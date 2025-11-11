@@ -25,9 +25,14 @@ public class GenreService {
 
     // create genre
     public Genre createGenre(Genre genre) {
-        if (genreRepository.findByNameContainingIgnoreCase(genre.getName()).isPresent()) {
-            throw new IllegalStateException("Genre with name '" + genre.getName() + "' already exists");
+        // Check if genre exists (case-insensitive)
+        String genreName = genre.getName().trim();
+        if (genreRepository.existsByNameIgnoreCase(genreName)) {
+            throw new IllegalArgumentException("A genre with this name already exists");
         }
+
+        // Set normalized name and save
+        genre.setName(genreName);
         return genreRepository.save(genre);
     }
 
