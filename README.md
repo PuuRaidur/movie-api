@@ -25,6 +25,7 @@ A robust RESTful API for managing a movie database, built with **Spring Boot**, 
 - **Java 25+**
 - **Gradle** (included via wrapper)
 - **SQLite** (no install needed — embedded via JDBC)
+- **Postman Collection** (included in the project and needs to be imported)
 
 ### Running the Application
 
