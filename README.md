@@ -25,6 +25,7 @@ A robust RESTful API for managing a movie database, built with **Spring Boot**, 
 - **Java 25+**
 - **Gradle** (included via wrapper)
 - **SQLite** (no install needed — embedded via JDBC)
+- **Postman** (needs to be installed)
 - **Postman Collection** (included in the project as a JSON file and needs to be imported into Postman)
 
 ### Running the Application
@@ -34,5 +35,11 @@ A robust RESTful API for managing a movie database, built with **Spring Boot**, 
 3. Start the server:
    ```bash
    ./gradlew bootRun
+   
+4. **Postman Guide**:
+1) Open Postman and click "Import"
+2) In "files" select the JSON file
+3) Once the collection is imported you can start using different endpoints under "Genre", "Actor" and "Movie" section
+
 The API will be available at:
 🔗 http://localhost:8080
