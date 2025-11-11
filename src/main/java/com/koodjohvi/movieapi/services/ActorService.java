@@ -109,9 +109,10 @@ public class ActorService {
 
         // if force is off and actor has associated movies
         if(!force && !actor.getMovies().isEmpty()) {
+            int movieCount = actor.getMovies().size();
             throw new DeletionNotAllowedException(
                 "Cannot delete actor '" + actor.getName() +
-                "' because actor has associated movie(s)"
+                "' because actor has " + movieCount + " associated movie(s)"
             );
         }
 

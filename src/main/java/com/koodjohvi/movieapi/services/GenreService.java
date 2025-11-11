@@ -81,9 +81,10 @@ public class GenreService {
 
         // if force is off and genre has associated movies
         if(!force && !genre.getMovies().isEmpty()) {
+            int movieCount = genre.getMovies().size();
             throw new DeletionNotAllowedException(
                 "Cannot delete genre '" + genre.getName() +
-                "' because genre has associated movie(s)."
+                "' because genre has " + movieCount + " associated movie(s)."
             );
         }
 
