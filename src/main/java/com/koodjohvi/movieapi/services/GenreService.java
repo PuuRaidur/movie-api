@@ -1,7 +1,6 @@
 package com.koodjohvi.movieapi.services;
 
 import com.koodjohvi.movieapi.entities.Genre;
-import com.koodjohvi.movieapi.entities.Movie;
 import com.koodjohvi.movieapi.exception.DeletionNotAllowedException;
 import com.koodjohvi.movieapi.exception.ResourceNotFoundException;
 import com.koodjohvi.movieapi.repositories.GenreRepository;

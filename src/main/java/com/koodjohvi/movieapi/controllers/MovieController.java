@@ -66,7 +66,7 @@ public class MovieController {
                 if (!actorRepository.existsById(actor)) {
                     throw new ResourceNotFoundException("Actor not found with id: " + actor);
                 }
-                return buildResponse(movieService.getMoviesByActor(actor, pageable, isUnpaginated));
+                return ResponseEntity.ok(movieService.getMoviesByActor(actor, pageable, isUnpaginated));
             } else if (title != null) {
                 return ResponseEntity.ok(movieService.getMoviesByTitleContainingIgnoreCase(title, pageable, isUnpaginated));
             } else {
@@ -85,11 +85,6 @@ public class MovieController {
     private boolean isPaginationRequested() {
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
         return request.getParameter("page") != null || request.getParameter("size") != null;
-    }
-
-    // Helper: wrap result in ResponseEntity (handles both List and Page)
-    private ResponseEntity<?> buildResponse(Object result) {
-        return ResponseEntity.ok(result);
     }
 
     // search for movies (GET /api/movies/search?title=)
