@@ -10,11 +10,9 @@ A robust RESTful API for managing a movie database, built with **Spring Boot**, 
     - Movies ↔ Actors (e.g., *The Avengers* stars multiple actors)
 - **Filtering & Search**:
     - Get movies by **genre**, **release year**, or **actor**
-    - Search movies by **title** (case-insensitive partial match)
-- **Pagination** support for all list endpoints (`?page=0&size=20`)
 - **Partial updates** using `PATCH`
 - **Safe deletion** with optional **force-delete** for entities in use
-- **Input validation** and **global error handling** (400, 404, 500 with clear messages)
+- **Input validation** and **global error handling** (400, 404 error codes)
 - **Sample data** included (loaded via API — no hardcoding)
 
 ---
@@ -26,7 +24,7 @@ A robust RESTful API for managing a movie database, built with **Spring Boot**, 
 - **Gradle** (included via wrapper)
 - **SQLite** (no install needed — embedded via JDBC)
 - **Postman** (needs to be installed)
-- **Postman Collection** (included in the project as a JSON file and needs to be imported into Postman)
+- **Postman Collection** (included in the project as a JSON file and needs to be imported into Postman for use)
 
 ### Running the Application
 
